@@ -11,7 +11,6 @@ namespace Terraria4PDA.DiscordBridge
 {
     public class ConfigFile
     {
-        // Config variables here:
         public string DiscordBotToken = "Token here";
         public string Prefix = "Prefix here";
         public ulong ChatID = 0;
@@ -23,16 +22,16 @@ namespace Terraria4PDA.DiscordBridge
         public bool Commands = true;
 
 
-        public List<ulong> OffRoles = new List<ulong>();
+        //public List<ulong> OffRoles = new List<ulong>();
 
-        public List<ulong> BanRoles = new List<ulong>();
+        //public List<ulong> BanRoles = new List<ulong>();
 
-        public List<ulong> KickRoles = new List<ulong>();
-        public List<ulong> MuteRoles = new List<ulong>();
+        //public List<ulong> KickRoles = new List<ulong>();
+        //public List<ulong> MuteRoles = new List<ulong>();
 
-        public List<ulong> ListRoles = new List<ulong>();
-        public List<ulong> InfoRoles = new List<ulong>();
-        public List<ulong> SafeRoles = new List<ulong>();
+        //public List<ulong> ListRoles = new List<ulong>();
+        //public List<ulong> InfoRoles = new List<ulong>();
+        //public List<ulong> SafeRoles = new List<ulong>();
 
         public string DiscordToTerrariaFormat = "[Discord] {0}: {1}";
         public string TerrariaToDiscordFormat = "{0} {1} {2}: {3}";

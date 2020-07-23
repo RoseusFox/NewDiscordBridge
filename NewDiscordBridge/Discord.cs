@@ -131,7 +131,7 @@ namespace Terraria4PDA.DiscordBridge
 
         public static void LoadConfig()
         {
-            string path = Path.Combine(TShock.SavePath, "Configs", "Discord.json");
+            string path = Path.Combine(TShock.SavePath, "NewDiscordBridge.json");
             Config = ConfigFile.Read(path);
         }
 

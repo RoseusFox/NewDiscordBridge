@@ -206,22 +206,24 @@ namespace Terraria4PDA.DiscordBridge
             }
         }
 
-        [Command("confuse")]
-        [Description("Confuse player")]
-        public async Task Confuse(CommandContext ctx, string user)
-        {
-            var players = TSPlayer.FindByNameOrID(user);
-            if (players.Count == 0)
-                await ctx.RespondAsync("Invalid player!");
-            else if (players.Count > 1)
-                await ctx.RespondAsync("Invalid player!");
-            else
-            {
-                var ply = players[0];
-                ply.Confused = !ply.Confused;
-                await ctx.RespondAsync(string.Format("{0} is {1} confused.", ply.Name, ply.Confused ? "now" : "no longer"));
-            }
-        }
+        //[Command("confuse")]
+        //[Description("Confuse player")]
+        //public async Task Confuse(CommandContext ctx, string user)
+        //{
+        //    var players = TSPlayer.FindByNameOrID(user);
+        //    if (players.Count == 0)
+        //        await ctx.RespondAsync("Invalid player!");
+        //    else if (players.Count > 1)
+        //        await ctx.RespondAsync("Invalid player!");
+        //    else
+        //    {
+        //        var ply = players[0];
+        //        ply.Confused = !ply.Confused;
+        //        await ctx.RespondAsync(string.Format("{0} is {1} confused.", ply.Name, ply.Confused ? "now" : "no longer"));
+        //    }
+        //}
+
+        [RequirePermissions(DSharpPlus.Permissions.MuteMembers)]
         [Command("mute")]
         [Description("Mute player")]
         public async Task Mute(CommandContext ctx, string player)
@@ -279,6 +281,7 @@ namespace Terraria4PDA.DiscordBridge
             }
         }
 
+        [RequirePermissions(DSharpPlus.Permissions.KickMembers)]
         [Command("kick")]
         [Description("/kick <player>")]
         public async Task Kick(CommandContext ctx, string player, string reason = null)
@@ -322,6 +325,7 @@ namespace Terraria4PDA.DiscordBridge
             }
         }
 
+        [RequirePermissions(DSharpPlus.Permissions.BanMembers)]
         [Command("ban")]
         [Description("Ban player or IP")]
         public async Task Ban(CommandContext ctx, string user, string time, string reason = "no reason")
@@ -515,6 +519,8 @@ namespace Terraria4PDA.DiscordBridge
 
             return;
         }
+
+        [RequirePermissions(DSharpPlus.Permissions.BanMembers)]
         [Command("unban")]
         [Description("Unban player or IP")]
         public async Task UnBan(CommandContext ctx, string user)
@@ -608,6 +614,7 @@ namespace Terraria4PDA.DiscordBridge
             }
         }
 
+        [RequirePermissions(DSharpPlus.Permissions.Administrator)]
         [Command("off")]
         [Description("Shuts down the server while saving.")]
         public async Task Off(CommandContext ctx)
