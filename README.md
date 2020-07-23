@@ -11,11 +11,11 @@ NewDiscordBridge is a new plugin that will allow you not only to exchange messag
 moderate directly from discord!
 
 ## Commands
-* **ban <player/IP> \<time> [reason]** - ban user or ip.
+* **ban <player/IP> \<time> [reason]** - ban user or ip. **Requires the ban permission!**
 	* **unban <player/IP>**
-* **kick \<player> [reason]** - kicks the player.
-* **mute \<player>** - mute/unmute player.
-* **off** - shuts down the server while saving.
+* **kick \<player> [reason]** - kicks the player.  **Requires the kick permission!**
+* **mute \<player>** - mute/unmute player.  **Requires the mute permission!**
+* **off** - shuts down the server while saving.  **Requires the administrator permission!**
 * **info <player/IP>** - shows information about the player's account or IP.
 * **who** - displays a list of players.
 
@@ -26,3 +26,9 @@ DiscordBotToken | Insert the token for your bot from the [Developer Portal](http
 Prefix | Prefix for your commands, e. g. "/", or "bot-" | String
 Chat | Enable if you need chat between server and discord | Boolean
 Commands | Enable if you need commands | Boolean
+ChatID | ID of channel for chat | UInt64
+LogID | ID of channel for logs | UInt64
+JoinLogID | ID of channel for join/leave messages | UInt64
+DiscordToTerrariaFormat | Format of messages from discord. <br/>*{0} - Username, {1} - Message* | String
+TerrariaToDiscordFormat | Format of messages from server. <br/>*{0} - Prefix, {1} - Username, {2} - Suffix, {3} - Message* | String
+Messagecolor | RGB color for messages from discord | Int32[]
