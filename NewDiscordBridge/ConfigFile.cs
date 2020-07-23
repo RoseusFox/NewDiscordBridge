@@ -14,9 +14,9 @@ namespace Terraria4PDA.DiscordBridge
         // Config variables here:
         public string DiscordBotToken = "Token here";
         public string Prefix = "Prefix here";
-        public ulong ChatID;
-        public ulong LogID;
-        public ulong JoinLogID;
+        public ulong ChatID = 0;
+        public ulong LogID = 0;
+        public ulong JoinLogID = 0;
 
 
         public bool Chat = true;
@@ -34,7 +34,8 @@ namespace Terraria4PDA.DiscordBridge
         public List<ulong> InfoRoles = new List<ulong>();
         public List<ulong> SafeRoles = new List<ulong>();
 
-        public string MessageFormatDiscordToTerraria = "[Discord] {0}: {1}";
+        public string DiscordToTerrariaFormat = "[Discord] {0}: {1}";
+        public string TerrariaToDiscordFormat = "{0} {1} {2}: {3}";
         public int[] Messagecolor = { 0, 102, 204 };
 
 
@@ -48,11 +49,6 @@ namespace Terraria4PDA.DiscordBridge
                 return config;
             }
             return JsonConvert.DeserializeObject<ConfigFile>(File.ReadAllText(path));
-        }
-
-        public Microsoft.Xna.Framework.Color GetColor()
-        {
-            return new Microsoft.Xna.Framework.Color(Messagecolor[0], Messagecolor[1], Messagecolor[2]);
         }
     }
 }

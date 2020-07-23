@@ -12,6 +12,8 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.EventArgs;
 
+using Microsoft.Xna.Framework;
+
 using TShockAPI;
 using Terraria;
 using TerrariaApi.Server;
@@ -28,12 +30,14 @@ namespace Terraria4PDA.DiscordBridge
 
         public override string Name => "Discord4PDA";
 
-        public override Version Version => new Version(1, 0, 0, 0);
+        public override Version Version => new Version(0, 0, 0, 1);
 
         public Discord(Main game) : base(game)
         {
 
         }
+
+        static Color Color;
 
         public override async void Initialize()
         {
@@ -44,12 +48,16 @@ namespace Terraria4PDA.DiscordBridge
             ServerApi.Hooks.NetGreetPlayer.Register(this, OnGreet);
             ServerApi.Hooks.WorldSave.Register(this, OnSave);
 
-            GetDataHandlers.KillMe += Bridge.OnKill; 
+            GeneralHooks.ReloadEvent += OnReload;
+            //GetDataHandlers.KillMe += Bridge.OnKill; 
             PlayerHooks.PlayerCommand += Logs.OnPlayerCommand;
             PlayerHooks.PlayerLogout += OnLogout;
+            PlayerHooks.PlayerChat += OnChat;
             #endregion
 
             LoadConfig();
+
+            Color = new Color(Config.Messagecolor[0], Config.Messagecolor[1], Config.Messagecolor[2]);
 
             if (Config.DiscordBotToken != "Token here")
             {
@@ -78,14 +86,13 @@ namespace Terraria4PDA.DiscordBridge
 
                     DiscordCommands.RegisterCommands<BotCommands>();
 
-                    this.DiscordCommands.SetHelpFormatter<HelpFormatter>();
+                    //this.DiscordCommands.SetHelpFormatter<HelpFormatter>();
 
-                    this.DiscordCommands.CommandExecuted += this.Commands_CommandExecuted;
-                    this.DiscordCommands.CommandErrored += this.Commands_CommandErrored;
+                    this.DiscordCommands.CommandExecuted += this.CommandExecuted;
+                    this.DiscordCommands.CommandErrored += this.CommandErrored;
                 }
 
-                DiscordBot.ClientErrored += this.Client_ClientError;
-                DiscordBot.GuildMemberAdded += this.OnMemberJoin;
+                DiscordBot.ClientErrored += this.ClientErrored;
                 DiscordBot.MessageCreated += OnMessageCreated;
             }
             else Environment.Exit(0);
@@ -101,9 +108,11 @@ namespace Terraria4PDA.DiscordBridge
                 ServerApi.Hooks.NetGreetPlayer.Deregister(this, OnGreet);
                 ServerApi.Hooks.WorldSave.Deregister(this, OnSave);
 
-                GetDataHandlers.KillMe -= Bridge.OnKill;
+                GeneralHooks.ReloadEvent -= OnReload;
+                //GetDataHandlers.KillMe -= Bridge.OnKill;
                 PlayerHooks.PlayerCommand -= Logs.OnPlayerCommand;
                 PlayerHooks.PlayerLogout -= OnLogout;
+                PlayerHooks.PlayerChat -= OnChat;
 
 
                 await Logs.Goodbye();
@@ -128,73 +137,8 @@ namespace Terraria4PDA.DiscordBridge
 
 
 
-        #region Hooks
-        private async Task OnMemberJoin(GuildMemberAddEventArgs args)
-        {
-            if (!Config.Welcomer)
-                return;
-
-            DiscordUser ilnur = await DiscordBot.GetUserAsync(419561144462606364);
-            await args.Member.SendMessageAsync($"Hello! Welcome to ***{args.Guild.Name}***! Now we have two servers for MOBILE Terraria 1.3.0.7 and one PC server for latest 1.4. Please, read the rules! " +
-                $"If you have a questions about technical issues, please contact the **{args.Guild.Owner.Username}**." +
-                $"With other questions contact with **{ilnur.Username}**.");
-            await args.Member.SendMessageAsync("**-----------------**");
-            await args.Member.SendMessageAsync($"Добро пожаловать на ***{args.Guild.Name}***! Сейчас у нас есть два сервера для МОБИЛЬНОЙ Террарии 1.3.0.7 и один ПК сервер для последней 1.4. Пожалуйста, прочитайте правила!" +
-                $"Если вы хотите задать технический вопрос, или указать на баг - пишите **{args.Guild.Owner.Username}**." +
-                $"По другим вопросам пишите **{ilnur.Username}**");
-            await args.Member.SendMessageAsync("**IP:** \n__Mobile 1__: `4pdaclub.sytes.net:7777`\n__Mobile 2__: `4pda-mg.sytes.net:7777`\n__PC (beta)__: `4pda-mg.sytes.net:7778`");
-
-            var status = await DiscordBot.GetChannelAsync(Config.MemberCountID);
-            var guild = await DiscordBot.GetGuildAsync(565583751665549344);
-
-            int members = guild.MemberCount;
-
-            await status.ModifyAsync("Members: " + members);
-        }
-        private async Task OnMessageCreated(MessageCreateEventArgs e)
-        {
-            if (e.Author == DiscordBot.CurrentUser)
-                return;
-            if (e.Author.IsBot)
-                return;
-            if (e.Channel.Id != Config.ChatID)
-                return;
-
-            DiscordMember member = await e.Guild.GetMemberAsync(e.Author.Id);
-            string hex = "FFFFFF";
-
-            foreach (ulong id in Config.Roles)
-            {
-                DiscordRole role = e.Guild.GetRole(id);
-                if (member.Roles.Contains(role))
-                {
-                    System.Drawing.Color color = System.Drawing.Color.FromArgb(member.Color.R, member.Color.G, member.Color.B);
-                    hex = color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
-                    break;
-                }
-            }
-
-            string text = $"[c/{hex}:" + e.Message.Content + "]";
-
-            Regex regex = new Regex(@"\n");
-            if (regex.IsMatch(e.Message.Content))
-            {
-                string[] strings = regex.Split(e.Message.Content);
-                text = "";
-                foreach (string str in strings)
-                {
-                    if (string.IsNullOrWhiteSpace(str))
-                        continue;
-                    text += $"[c/{hex}:" + str + "]\n";
-                }
-            }
-
-            TShock.Utils.Broadcast(String.Format(Config.MessageFormatDiscordToTerraria, e.Author.Username, @text), Config.GetColor());
-            return;
-        }
-
-
-        private Task Client_ClientError(ClientErrorEventArgs e)
+        #region SysHooks
+        private Task ClientErrored(ClientErrorEventArgs e)
         {
             // let's log the details of the error that just 
             // occured in our client
@@ -208,7 +152,7 @@ namespace Terraria4PDA.DiscordBridge
             return Task.CompletedTask;
         }
 
-        private async Task Commands_CommandExecuted(CommandExecutionEventArgs e)
+        private async Task CommandExecuted(CommandExecutionEventArgs e)
         {
             // let's log the name of the command and user
             e.Context.Client.DebugLogger.LogMessage(LogLevel.Info, "ExampleBot", $"{e.Context.User.Username} successfully executed '{e.Command.QualifiedName}'", DateTime.Now);
@@ -221,7 +165,7 @@ namespace Terraria4PDA.DiscordBridge
             // is done
             return;
         }
-        private async Task Commands_CommandErrored(CommandErrorEventArgs e)
+        private async Task CommandErrored(CommandErrorEventArgs e)
         {
             e.Context.Client.DebugLogger.LogMessage(LogLevel.Error, "ExampleBot", $"{e.Context.User.Username} tried executing '{e.Command?.QualifiedName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}\n \n{e.Exception.InnerException}", DateTime.Now);
 
@@ -253,30 +197,42 @@ namespace Terraria4PDA.DiscordBridge
                 await e.Context.RespondAsync("", embed: embed);
             }
         }
+        #endregion
 
-        static void OnGreet(GreetPlayerEventArgs args)
+        #region Discord Hooks
+        private async Task OnMessageCreated(MessageCreateEventArgs e)
         {
-            if (Config.Chat)
+            if (e.Channel.Id != Config.ChatID)
+                return;
+            if (e.Author == DiscordBot.CurrentUser || e.Author.IsBot)
+                return;
+
+            TShock.Utils.Broadcast(string.Format(Config.DiscordToTerrariaFormat, e.Author.Username, e.Message.Content), Color);
+            return;
+        }
+        #endregion
+
+        #region Terraria Hooks
+        void OnReload(ReloadEventArgs args)
+        {
+            Utils.ReloadConfig();
+            args.Player.SendSuccessMessage("NewDiscordBridge config reloaded.");
+        }
+        void OnGreet(GreetPlayerEventArgs args)
+        {
+            if (Config.JoinLogID != 0)
             {
                 Logs.JoinLeave(TShock.Players[args.Who]);
             }
-
-            Utils.CountPlayers();
         }
-        static void OnLogout(PlayerLogoutEventArgs args)
+        void OnLogout(PlayerLogoutEventArgs args)
         {
             if (args.Player == null)
-            {
                 return;
-            }
-
-
-            Utils.CountPlayers();
 
             if (args.Player.ReceivedInfo)
-            {
                 Logs.JoinLeave(args.Player, false);
-            }
+
             return;
         }
         void OnSave(WorldSaveEventArgs args)
@@ -286,11 +242,20 @@ namespace Terraria4PDA.DiscordBridge
                 Bridge.OnSaveWorld(args);
             }
         }
-        private void OnChat(PlayerChatEventArgs args)
+        void OnChat(PlayerChatEventArgs args)
         {
             if (Config.Chat)
             {
-                Bridge.SendMessage(args);
+                if (string.IsNullOrWhiteSpace(args.RawText))
+                    return;
+
+                string msg = string.Format(Discord.Config.TerrariaToDiscordFormat,
+                    args.Player.Group.Prefix,
+                    args.Player.Name,
+                    args.Player.Group.Suffix,
+                    args.RawText);
+
+                Bridge.SendMessage(msg);
             }
         }
         #endregion
