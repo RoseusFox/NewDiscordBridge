@@ -1,14 +1,16 @@
 # NewDiscordBridge
 <p align="center">
-<a href="https://discord.gg/myapppE">
-    <img src="https://img.shields.io/discord/565583751665549344?color=%237289da&label=Discord" />
+	<a href="https://discord.gg/myapppE">
+    		<img src="https://img.shields.io/discord/565583751665549344?color=%237289da&label=Discord" />
  	</a>
-	<!--<br/><br/>
-  <a href="https://github.com/Mortmael/NewDiscordBridge//README_ru.md">Русский</a>-->
-  </p>
+	<br/><br/>
+  	<a href="https://github.com/Mortmael/NewDiscordBridge/blob/master/README_ru.md">Русский</a>
+</p>
 
 NewDiscordBridge is a new plugin that will allow you not only to exchange messages with a chat on your server, but also
 moderate directly from discord!
+
+Supports: [Original TShock](https://github.com/Pryaxis/TShock), [Mobile TShock](https://github.com/Fe7n/TShockMobile)
 
 ## Commands
 * **ban <player/IP> \<time> [reason]** - ban user or ip. **Requires the ban permission!**
