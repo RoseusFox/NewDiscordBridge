@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using DSharpPlus;
@@ -9,101 +10,87 @@ using DSharpPlus.Entities;
 
 namespace Terraria4PDA.DiscordBridge
 {
-    //public class HelpFormatter : IHelpFormatter
-    //{
-    //    private DiscordEmbedBuilder EmbedBuilder { get; }
+    public class HelpFormatter : IHelpFormatter
+    {
+        private DiscordEmbedBuilder EmbedBuilder { get; }
+        private string commandStr;
+        private bool Args = false;
 
-    //    public HelpFormatter(CommandContext ctx) : base(ctx)
-    //    {
-    //        this.EmbedBuilder = new DiscordEmbedBuilder();
-    //    }
+        public HelpFormatter(CommandContext ctx) : base()
+        {
+            this.EmbedBuilder = new DiscordEmbedBuilder();
+        }
 
-    //    // this method is called first, it sets the current command's name
-    //    // if no command is currently being processed, it won't be called
-    //    public IHelpFormatter WithCommandName(string name)
-    //    {
-    //        string commandStr = null;
+        public IHelpFormatter WithCommandName(string name)
+        {
+            commandStr = Discord.Config.Prefix + name;
 
-    //        foreach (var overload in command.Overloads)
-    //        {
-    //            if (overload.Arguments.Count == 0)
-    //            {
-    //                continue;
-    //            }
+            return this;
+        }
 
-    //            commandStr = Formatter.InlineCode(Program.Config.Prefix + command.Name + " " + string.Join(" ", overload.Arguments.Select(xarg => (xarg.IsOptional) ? $"[{xarg.Name}]" : $"<{xarg.Name}>")));
-    //        }
+        // this method is called second, it sets the current command's 
+        // description. if no command is currently being processed, it 
+        // won't be called
+        public IHelpFormatter WithDescription(string description)
+        {
+            EmbedBuilder.AddField("Description", Formatter.Italic(description));
 
-    //        EmbedBuilder.AddField("Command", commandStr ?? Formatter.InlineCode($"{Program.Config.Prefix}{command.Name}"));
-    //        EmbedBuilder.AddField("Description", Formatter.Italic(command.Description));
+            return this;
+        }
 
-    //        return this;
-    //    }
+        // this method is called third, it is used when currently 
+        // processed group can be executed as a standalone command, 
+        // otherwise not called
+        public IHelpFormatter WithGroupExecutable()
+        {
+            EmbedBuilder.Description = "This group is a standalone command.";
 
-    //    // this method is called second, it sets the current command's 
-    //    // description. if no command is currently being processed, it 
-    //    // won't be called
-    //    public IHelpFormatter WithDescription(string description)
-    //    {
-    //        this.MessageBuilder.Append("Description: ")
-    //            .AppendLine(description)
-    //            .AppendLine();
+            return this;
+        }
 
-    //        return this;
-    //    }
+        // this method is called fourth, it sets the current command's 
+        // aliases. if no command is currently being processed, it won't
+        // be called
+        public IHelpFormatter WithAliases(IEnumerable<string> aliases)
+        {
+            EmbedBuilder.AddField("Aliases", string.Join(", ", aliases));
 
-    //    // this method is called third, it is used when currently 
-    //    // processed group can be executed as a standalone command, 
-    //    // otherwise not called
-    //    public IHelpFormatter WithGroupExecutable()
-    //    {
-    //        this.MessageBuilder.AppendLine("This group is a standalone command.")
-    //            .AppendLine();
+            return this;
+        }
 
-    //        return this;
-    //    }
+        // this method is called fifth, it sets the current command's 
+        // arguments. if no command is currently being processed, it won't 
+        // be called
+        public IHelpFormatter WithArguments(IEnumerable<CommandArgument> arguments)
+        {
+            Args = true;
+            commandStr += " " + string.Join(" ", arguments.Select(xarg => (xarg.IsOptional) ? $"[{xarg.Name}]" : $"<{xarg.Name}>"));
 
-    //    // this method is called fourth, it sets the current command's 
-    //    // aliases. if no command is currently being processed, it won't
-    //    // be called
-    //    public IHelpFormatter WithAliases(IEnumerable<string> aliases)
-    //    {
-    //        this.MessageBuilder.Append("Aliases: ")
-    //            .AppendLine(string.Join(", ", aliases))
-    //            .AppendLine();
+            EmbedBuilder.AddField("Command", commandStr);
 
-    //        return this;
-    //    }
+            return this;
+        }
 
-    //    // this method is called fifth, it sets the current command's 
-    //    // arguments. if no command is currently being processed, it won't 
-    //    // be called
-    //    public IHelpFormatter WithArguments(IEnumerable<CommandArgument> arguments)
-    //    {
-    //        this.MessageBuilder.Append("Arguments: ")
-    //            .AppendLine(string.Join(", ", arguments.Select(xarg => $"{xarg.Name} ({xarg.Type.ToUserFriendlyName()})")))
-    //            .AppendLine();
+        // this method is called sixth, it sets the current group's subcommands
+        // if no group is being processed or current command is not a group, it 
+        // won't be called
+        public IHelpFormatter WithSubcommands(IEnumerable<Command> subcommands)
+        {
+            EmbedBuilder.AddField("Commands", string.Join(", ", subcommands.Select(xc => Formatter.InlineCode(xc.Name))));
 
-    //        return this;
-    //    }
+            return this;
+        }
 
-    //    // this method is called sixth, it sets the current group's subcommands
-    //    // if no group is being processed or current command is not a group, it 
-    //    // won't be called
-    //    public IHelpFormatter WithSubcommands(IEnumerable<Command> subcommands)
-    //    {
-    //        this.MessageBuilder.Append("Subcommands: ")
-    //            .AppendLine(string.Join(", ", subcommands.Select(xc => xc.Name)))
-    //            .AppendLine();
+        // this is called as the last method, this should produce the final 
+        // message, and return it
+        public CommandHelpMessage Build()
+        {
+            EmbedBuilder.Title = "HELP";
+            EmbedBuilder.ThumbnailUrl = Discord.DiscordBot.CurrentUser.AvatarUrl;
+            EmbedBuilder.WithFooter("Type /help <command>", Discord.DiscordBot.CurrentUser.AvatarUrl);
+            EmbedBuilder.Timestamp = DateTime.UtcNow;
 
-    //        return this;
-    //    }
-
-    //    // this is called as the last method, this should produce the final 
-    //    // message, and return it
-    //    public CommandHelpMessage Build()
-    //    {
-    //        return new CommandHelpMessage(this.MessageBuilder.ToString().Replace("\r\n", "\n"));
-    //    }
-    //}
+            return new CommandHelpMessage(null, EmbedBuilder.Build());
+        }
+    }
 }

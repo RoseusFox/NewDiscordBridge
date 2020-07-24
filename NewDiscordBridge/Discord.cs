@@ -30,7 +30,7 @@ namespace Terraria4PDA.DiscordBridge
 
         public override string Name => "Discord4PDA";
 
-        public override Version Version => new Version(0, 0, 0, 1);
+        public override Version Version => new Version(1, 0, 0, 0);
 
         public Discord(Main game) : base(game)
         {
