@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 using DSharpPlus;
 
+using Terraria;
+
 using TShockAPI;
 using TShockAPI.DB;
 
@@ -44,7 +46,7 @@ namespace Terraria4PDA.DiscordBridge
         public static async Task Online()
         {
             var chat = await Discord.DiscordBot.GetChannelAsync(Discord.Config.ChatID);
-            await Discord.DiscordBot.SendMessageAsync(chat, $"✅ ***{TShock.Config.ServerName}***: Server online!");
+            await Discord.DiscordBot.SendMessageAsync(chat, $"✅ ***{((string.IsNullOrWhiteSpace(TShock.Config.ServerName)) ? Main.worldName : TShock.Config.ServerName)}***: Server online!");
         }
         public async void OnServerCommand(TerrariaApi.Server.CommandEventArgs args)
         {

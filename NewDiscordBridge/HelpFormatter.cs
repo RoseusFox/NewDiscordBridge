@@ -16,7 +16,7 @@ namespace Terraria4PDA.DiscordBridge
         private string commandStr;
         private bool Args = false;
 
-        public HelpFormatter(CommandContext ctx) : base()
+        public HelpFormatter()
         {
             this.EmbedBuilder = new DiscordEmbedBuilder();
         }

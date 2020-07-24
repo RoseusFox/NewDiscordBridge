@@ -22,7 +22,7 @@ using TShockAPI.Hooks;
 namespace Terraria4PDA.DiscordBridge
 {
     [ApiVersion(2, 1)]
-    class Discord : TerrariaPlugin
+    public class Discord : TerrariaPlugin
     {
         public override string Author => "Mortmael";
 
@@ -86,7 +86,7 @@ namespace Terraria4PDA.DiscordBridge
 
                     DiscordCommands.RegisterCommands<BotCommands>();
 
-                    //this.DiscordCommands.SetHelpFormatter<HelpFormatter>();
+                    this.DiscordCommands.SetHelpFormatter<HelpFormatter>();
 
                     this.DiscordCommands.CommandExecuted += this.CommandExecuted;
                     this.DiscordCommands.CommandErrored += this.CommandErrored;
@@ -252,7 +252,7 @@ namespace Terraria4PDA.DiscordBridge
                 string msg = string.Format(Discord.Config.TerrariaToDiscordFormat,
                     args.Player.Group.Prefix,
                     args.Player.Name,
-                    args.Player.Group.Suffix,
+                    (string.IsNullOrWhiteSpace(args.Player.Group.Suffix))?"":args.Player.Group.Suffix,
                     args.RawText);
 
                 Bridge.SendMessage(msg);
