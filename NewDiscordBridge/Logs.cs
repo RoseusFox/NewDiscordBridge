@@ -68,7 +68,7 @@ namespace Terraria4PDA.DiscordBridge
         }
         public static async void OnPlayerCommand(PlayerCommandEventArgs args)
         {
-            if ((args.Player == null) || (args.Player == TSPlayer.Server) || args.CommandText.Contains("login") || args.CommandText.Contains("register") || args.CommandText.Contains("user password"))
+            if ((args.Player == null) || (args.Player == TSPlayer.Server) || args.CommandText.Contains("login") || args.CommandText.Contains("register") || args.CommandText.Contains("password"))
                 return;
             try
             {
